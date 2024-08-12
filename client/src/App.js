@@ -2,7 +2,7 @@ import './App.css';
 import { BrowserRouter as Router} from 'react-router-dom';
 
 import { UserContext } from './utils/UserContext';
-import { magic } from './utils/magic';
+// import { magic } from './utils/magic';
 import { useEffect, useState } from 'react';
 
 import Cookies from 'universal-cookie';
@@ -15,7 +15,9 @@ function App() {
   async function setCredentials(userData) {
     setUser(userData);
     if (!window.localStorage.getItem("didToken")) {
-      let newDidToken = await magic.user.getIdToken({lifespan: 24*60*60});
+
+      let newDidToken = 'asdasdasgwegwgsdfsdfs';
+      // let newDidToken = await magic.user.getIdToken({lifespan: 24*60*60});
       window.localStorage.setItem("didToken", newDidToken);
     }
   }
@@ -24,11 +26,14 @@ function App() {
   // Otherwise, set it to {user: null}
   useEffect(() => {
     setUser({ loading: true });
-    magic.user.isLoggedIn().then((isLoggedIn) => {
-      return isLoggedIn
-        ? magic.user.getMetadata().then((userData) => setUser(userData))
-        : setUser({ user: null });
-    });
+    setUser({
+      username: "sergey"
+    })
+    // magic.user.isLoggedIn().then((isLoggedIn) => {
+    //   return isLoggedIn
+    //     ? magic.user.getMetadata().then((userData) => setUser(userData))
+    //     : setUser({ user: null });
+    // });
   }, []);
 
   return (

@@ -19,7 +19,7 @@ function Signin() {
   const [disabled, setDisabled] = useState(false);
   const [email, setEmail] = useState("");
   const [userName, setUserName] = useState("");
-  const [newUser, setNewUser] = useState(false);
+  const [newUser, setNewUser] = useState(true);
   const [user, setUser] = useContext(UserContext);
 
   useEffect(() => {
@@ -43,80 +43,93 @@ function Signin() {
     }
     try {
       setDisabled(true); // disable login button to prevent multiple emails from being triggered
+      console.log('--------',newUser)
+     if(true) {
+       navigate("/app/home");
+     } else {
+       // !newUser
+       debugger
+       if (!newUser) {
+         const check = await Axios.post(
+             `${process.env.REACT_APP_SERVER_URL}/api/user/check`,
+             { email }
+         );
+         console.log('----------',check.data.message);
+         if (check.data.message === "user_not_found") {
+           toast((t) => <span>Please Sign Up first!</span>, {
+             icon: "⚠️",
+             style: {
+               borderRadius: "5px",
+               background: "#333",
+               color: "#c8c8c8",
+             },
+           });
+           inpRef.current.value = "";
+           setDisabled(false);
+           return;
+         }
+       }
 
-      if (!newUser) {
-        const check = await Axios.post(
-          `${process.env.REACT_APP_SERVER_URL}/api/user/check`,
-          { email }
-        );
-        console.log(check.data.message);
-        if (check.data.message === "user_not_found") {
-          toast((t) => <span>Please Sign Up first!</span>, {
-            icon: "⚠️",
-            style: {
-              borderRadius: "5px",
-              background: "#333",
-              color: "#c8c8c8",
-            },
-          });
-          inpRef.current.value = "";
-          setDisabled(false);
-          return;
-        }
-      }
+       // Trigger Magic link to be sent to user
+       // let didToken = await magic.auth.loginWithMagicLink({
+       //   email,didToken
+       // });
 
-      // Trigger Magic link to be sent to user
-      let didToken = await magic.auth.loginWithMagicLink({
-        email,
-      });
+       let didToken = 'asdasdasdasdasdas';
 
-      // Validate didToken with server
-      const res = await fetch(
-        `${process.env.REACT_APP_SERVER_URL}/api/user/login`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer " + didToken,
-          },
-        }
-      );
 
-      if (res.status === 200) {
-        // Set the UserContext to the now logged in user
-        let userMetadata = await magic.user.getMetadata();
-        await setUser(userMetadata);
-        let newDidToken = await magic.user.getIdToken({
-          lifespan: 24 * 60 * 60 * 7,
-        });
-        window.localStorage.setItem("didToken", newDidToken);
-        // cookie.set("didToken", newDidToken);
-        await Axios.post(
-          `${process.env.REACT_APP_SERVER_URL}/api/user/create`,
-          { magic_id: userMetadata.issuer, user_name: userName, email: email },
-          {
-            headers: {
-              Authorization:
-                "Bearer " + window.localStorage.getItem("didToken"),
-            },
-          }
-        )
-          .then((res) => {
-            console.log(res.data);
-          })
-          .catch((err) => {
-            console.log(err);
-          });
+       // Validate didToken with server
+       const res = await fetch(
+           `${process.env.REACT_APP_SERVER_URL}/api/user/login`,
+           {
+             method: "POST",
+             headers: {
+               "Content-Type": "application/json",
+               Authorization: "Bearer " + didToken,
+             },
+           }
+       );
 
-        await Axios.get(
-          `${process.env.REACT_APP_SERVER_URL}/api/user/getName/${userMetadata.issuer}`
-        ).then((res) => {
-          window.localStorage.setItem("userName", res.data.user_name);
-        });
+       if (res.status === 200) {
+         // Set the UserContext to the now logged in user
+         let userMetadata = {
+           user: 'sergey'
+         };
+         // let userMetadata = await magic.user.getMetadata();
+         await setUser(userMetadata);
+         // let newDidToken = await magic.user.getIdToken({
+         //   lifespan: 24 * 60 * 60 * 7,
+         // });
+         let newDidToken = '3243423423';
+         window.localStorage.setItem("didToken", newDidToken);
+         // cookie.set("didToken", newDidToken);
+         await Axios.post(
+             `${process.env.REACT_APP_SERVER_URL}/api/user/create`,
+             { magic_id: userMetadata.issuer, user_name: userName, email: email },
+             {
+               headers: {
+                 Authorization:
+                     "Bearer " + window.localStorage.getItem("didToken"),
+               },
+             }
+         )
+             .then((res) => {
+               console.log(res.data);
+             })
+             .catch((err) => {
+               console.log(err);
+             });
 
-        console.log(userMetadata);
-        navigate("/app/home");
-      }
+         await Axios.get(
+             `${process.env.REACT_APP_SERVER_URL}/api/user/getName/${userMetadata.issuer}`
+         ).then((res) => {
+           window.localStorage.setItem("userName", res.data.user_name);
+         });
+
+         console.log(userMetadata);
+         navigate("/app/home");
+       }
+     }
     } catch (error) {
       setDisabled(false); // re-enable login button - user may have requested to edit their email
       console.log(error);

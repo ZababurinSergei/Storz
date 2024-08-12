@@ -8,7 +8,8 @@ const magic = new Magic(process.env.MAGIC_SECRET_KEY);
 
 router.post('/api/user/check', async (req, res, next) => {
   const { email } = req.body;
-  const user = await User.findOne({ email });
+  // const user = await User.findOne({ email });
+  const user = true
   if (user) {
     return res.status(200).json({
       message: 'user_found'

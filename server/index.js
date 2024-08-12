@@ -55,7 +55,7 @@ mongoose
     logger.error(err);
   });
 
-const PORT = process.env.PORT || 8080;
+const PORT = process.env.PORT || 7984;
 
 app.use('/', Main);
 app.use('/test', Test);
